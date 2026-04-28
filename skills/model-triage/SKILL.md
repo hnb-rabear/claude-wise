@@ -1,11 +1,30 @@
 ---
 name: model-triage
-description: Auto-evaluate coding task complexity at conversation start and recommend the optimal model (max-power/Opus vs medium-power/Sonnet). Also monitors for mid-implementation complexity escalation.
+description: Auto-evaluate coding task complexity at conversation start and recommend the optimal model (Opus vs Sonnet). Also monitors for mid-implementation complexity escalation.
 ---
 
 # Model Triage
 
 Evaluate task complexity and recommend the right model before any work begins. This skill optimizes for **time first, cost second** — a wrong model wastes 20+ minutes of human time.
+
+## Model Tiers
+
+This skill uses two capability tiers. Map them to your setup:
+
+| Tier | Purpose | Default model | Examples of custom names |
+|------|---------|--------------|--------------------------|
+| **Strong** | Complex, multi-file, architectural, ambiguous tasks | Opus (`claude-opus-4-7`) | `max-power`, `opus`, etc. |
+| **Fast** | Routine, single-file, pattern-following tasks | Sonnet (`claude-sonnet-4-6`) | `medium-power`, `sonnet`, etc. |
+
+To customize: add a `## Model Triage (config)` section to your project or user CLAUDE.md:
+
+```md
+## Model Triage (config)
+- Strong model: `max-power`
+- Fast model: `medium-power`
+```
+
+If not configured, use the default model names (Opus / Sonnet).
 
 ## When This Skill Fires
 
@@ -14,7 +33,7 @@ At the **start of any conversation** when the user describes a coding task. Eval
 ## Workflow
 
 1. User describes a task.
-2. Check the project's CLAUDE.md for "always max-power" domains. If the task matches any, skip evaluation and start working silently.
+2. Check the project's CLAUDE.md for "always strong model" domains. If the task matches any, skip evaluation and start working silently.
 3. Evaluate 6 dimensions (below), each scored 1-5.
 4. **Total >= 15 → say nothing.** Stay on current model and start working.
 5. **Total < 15 → output a short recommendation** and wait for the user to switch before continuing.
@@ -32,33 +51,36 @@ At the **start of any conversation** when the user describes a coding task. Eval
 
 ## Output (when recommending downgrade)
 
+Use the user's configured model names if available, otherwise use default names.
+
 ```
-Model recommendation: `medium-power` (score 9/30)
+Model recommendation: Sonnet (score 9/30)
   Algorithm 2 + Scope 1 + Domain 1 + Ambiguity 2 + Edge cases 2 + Risk 1
   Routine single-file endpoint following existing patterns.
 Switch model before I begin?
 ```
 
-## Output (when staying on max-power)
+## Output (when staying on strong model)
 
 No output. Just start working. Do not interrupt the user for a non-actionable recommendation.
 
 ## Project-Specific Overrides
 
-Projects can define "always max-power" domains in their CLAUDE.md. When the task touches any listed domain, skip evaluation entirely and stay on max-power. Example:
+Projects can define "always strong model" domains in their CLAUDE.md. When the task touches any listed domain, skip evaluation entirely and stay on the strong model. Example:
 
 ```md
-### Always `max-power` (skip evaluation)
-- mv/ folder (renderer, effects, shaders)
-- CDP / Suno integration
-- SSE streaming endpoints
+### Always strong model (skip evaluation)
+- GPU/shader code
+- Authentication / OAuth flows
+- Database migrations
+- Debugging subtle or intermittent bugs
 ```
 
 These are owned by each project, not by this plugin.
 
 ## Mid-Implementation Escalation
 
-During implementation on `medium-power`, if ANY of these occur, you MUST immediately warn:
+During implementation on the fast model, if ANY of these occur, you MUST immediately warn:
 
 1. **Discovered complexity** — a step is harder than predicted (unexpected async interaction, hidden state coupling).
 2. **Repeated failure** — you have attempted the same step 2+ times with different approaches and failed.
@@ -68,7 +90,7 @@ During implementation on `medium-power`, if ANY of these occur, you MUST immedia
 ### Warning Format
 
 ```
-Complexity escalated — recommend switching to `max-power`.
-Reason: [specific reason, e.g. "Step 3 requires modifying GPU shader uniforms"].
-This was not anticipated in the plan. Continue on medium-power or switch?
+Complexity escalated — recommend switching to the strong model (Opus).
+Reason: [specific reason, e.g. "Step 3 requires modifying database schema"].
+This was not anticipated in the plan. Continue on current model or switch?
 ```

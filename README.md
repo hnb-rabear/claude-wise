@@ -1,52 +1,71 @@
 # claude-wise
 
-Smart model selection for Claude Code.
+Smart model selection for Claude Code. Auto-evaluates coding task complexity and recommends the optimal model (Opus vs Sonnet) to optimize both cost and time.
 
-## Why This Exists
+## Why
 
-Using the right model for the right task is critical for efficient agentic coding:
-- **Cost problem:** Using `max-power` (Opus, ~$15/Mtok) for simple CRUD tasks or styling changes is overkill and expensive.
-- **Time problem:** Using `medium-power` (Sonnet, ~$3/Mtok) for complex algorithmic tasks or deep refactoring often leads to failed implementations, loops of debugging, and wasted time (often 20+ minutes of human time lost).
+- **Opus** (~$15/Mtok) is overkill for simple tasks like CSS tweaks or config changes.
+- **Sonnet** (~$3/Mtok) fails complex tasks — wrong output wastes 20+ minutes of human time.
+- Manually evaluating task complexity defeats the purpose of having an AI assistant.
 
-`claude-wise` introduces a systematic triage framework to auto-evaluate task complexity and route to the optimal model.
+claude-wise has the AI evaluate complexity itself and recommend the right model.
 
 ## How It Works
 
-The workflow uses a **Thinking vs. Doing** split, evaluating complexity at two key points:
+### Session Workflow
 
-1. **Conversation Start (Triage):** Auto-evaluates the user's initial request. If it's simple, recommends downgrading before starting.
-2. **Implementation Handoff:** The planning phase always runs on `max-power` (Opus). After creating an implementation plan, the plan's *concrete complexity* is evaluated to recommend the cheapest safe model for the actual execution phase.
+```
+THINKING PHASE (always Opus)
+  Brainstorming -> Planning -> Model Handoff Recommendation
 
-## Skills
+DOING PHASE (model assigned by handoff)
+  Implementation on recommended model
+  -> warns if complexity escalates mid-task
+```
 
-| Skill | Description | When It Fires |
-|-------|-------------|---------------|
-| `model-triage` | Auto-evaluates coding task complexity across 6 dimensions. | Start of conversation. |
-| `model-handoff` | Evaluates a completed implementation plan and appends a model recommendation with escalation triggers. | End of writing an implementation plan. |
+### Two Skills
 
-## Commands
+| Skill | When | What |
+|-------|------|------|
+| `claude-wise:model-triage` | Conversation start | Scores task on 6 dimensions (algorithm, scope, domain, ambiguity, edge cases, risk). Total >= 15 -> Opus, < 15 -> Sonnet. |
+| `claude-wise:model-handoff` | End of implementation plan | Evaluates the concrete plan and appends a Model Handoff Recommendation with escalation triggers. |
 
-- `/triage <task description>`: Manually evaluate a task and get a model recommendation without actually starting the work.
+### One Command
+
+`/triage <task description>` -- Manual evaluation with full scoring table output.
 
 ## Installation
 
-```bash
+```
 /plugin marketplace add hnb-rabear/claude-wise
 /plugin install claude-wise@claude-wise
 ```
 
-## Project-Specific Configuration
+## Configuration
 
-You can override the triage evaluation for specific domains in your project by adding an "always max-power" section to your project's `CLAUDE.md`:
+### Custom Model Names
+
+If you use custom model aliases (e.g., `max-power` for Opus), add to your CLAUDE.md:
 
 ```md
-### Always `max-power` (skip evaluation)
-- mv/ folder (renderer, effects, shaders)
-- CDP / Suno integration
-- SSE streaming endpoints
+## Model Triage (config)
+- Strong model: `max-power`
+- Fast model: `medium-power`
 ```
 
-When a task touches these domains, the plugin will skip evaluation and stay on `max-power`.
+### Project-Specific Overrides
+
+Add "always strong model" domains to your project's CLAUDE.md to skip triage for complex areas:
+
+```md
+### Always strong model (skip evaluation)
+- GPU/shader code
+- Authentication / OAuth flows
+- Database migrations
+- Debugging subtle or intermittent bugs
+```
+
+When a task touches these domains, the plugin skips evaluation and stays on the strong model.
 
 ## License
 

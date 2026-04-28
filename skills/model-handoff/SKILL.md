@@ -36,9 +36,9 @@ Score the same 6 dimensions as model-triage, but against the concrete plan:
 
 ### Decision Rules
 
-- **Total >= 15 → recommend `max-power`.**
-- **Any single dimension >= 4 → recommend `max-power`** (one hard step makes the whole plan hard).
-- **Total < 15 AND all dimensions < 4 → recommend `medium-power`.**
+- **Total >= 15 → recommend strong model (Opus).**
+- **Any single dimension >= 4 → recommend strong model (Opus)** (one hard step makes the whole plan hard).
+- **Total < 15 AND all dimensions < 4 → recommend fast model (Sonnet).**
 
 ## Output
 
@@ -47,12 +47,12 @@ Append this block to the end of the plan document:
 ```md
 ## Model Handoff Recommendation
 
-**Recommended model:** `medium-power` (or `max-power`)
+**Recommended model:** Sonnet (or Opus)
 **Score:** X/30
 **Reasoning:** [1-2 sentences explaining why this model is appropriate]
 
 ### Escalation Triggers
-If you encounter any of these during implementation, warn the user to consider switching to `max-power`:
+If you encounter any of these during implementation, warn the user to consider switching to the strong model (Opus):
 - [Plan-specific trigger 1]
 - [Plan-specific trigger 2]
 - [Plan-specific trigger 3]

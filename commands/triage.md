@@ -1,10 +1,11 @@
 ---
-description: Evaluate task complexity and recommend the best model (max-power/Opus or medium-power/Sonnet)
+description: Evaluate task complexity and recommend the best model (Opus vs Sonnet)
 ---
 
 Do NOT implement anything. Only evaluate the task below and recommend a model.
 
-## Task:
+## Task
+
 $ARGUMENTS
 
 ## Evaluation
@@ -20,10 +21,10 @@ Score each dimension 1-5:
 
 Check the project's CLAUDE.md for "always max-power" domains. If the task touches any, note it.
 
-## Output format:
+## Output format
 
 | Dimension | Score | Note |
-|-----------|-------|------|
+| --------- | ----- | ---- |
 | Algorithm | /5 | |
 | Scope | /5 | |
 | Domain | /5 | |
@@ -33,11 +34,12 @@ Check the project's CLAUDE.md for "always max-power" domains. If the task touche
 | **Total** | **/30** | |
 
 ### Decision
-- **>= 15 -> `max-power`** (stay on Opus)
-- **< 15 -> `medium-power`** (switch to Sonnet)
 
-**Recommendation: `[model name]`**
+- **>= 15 -> stay on Opus** (strong model)
+- **< 15 -> switch to Sonnet** (fast model)
+
+**Recommendation: `[Opus or Sonnet]`**
 
 One-line reasoning.
 
-Then say: "Switch to **[model]** and describe your task to begin." (or "Stay on current model and begin." if max-power)
+Then say: "Switch to **[model]** and describe your task to begin." (or "Stay on current model and begin." if Opus)
