@@ -1,0 +1,22 @@
+{
+  "name": "claude-wise",
+  "description": "Smart model selection for Claude Code — auto-evaluates task complexity and recommends the optimal model (Opus vs Sonnet) to optimize both cost and time",
+  "version": "1.0.0",
+  "author": {
+    "name": "hnb-rabear"
+  },
+  "homepage": "https://github.com/hnb-rabear/claude-wise",
+  "repository": "https://github.com/hnb-rabear/claude-wise",
+  "license": "MIT",
+  "keywords": [
+    "model-selection",
+    "triage",
+    "cost-optimization",
+    "workflow",
+    "smart-routing"
+  ],
+  "skills": [
+    "./skills/model-triage",
+    "./skills/model-handoff"
+  ]
+}
